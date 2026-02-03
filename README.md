@@ -1,62 +1,116 @@
-# RainTrack TCC
+# 🌧️ RainTrack – Monitoramento Meteorológico em Tempo Real
 
-Este Trabalho de Conclusão de Curso (TCC) propõe o desenvolvimento do sistema 'RainTrack', focado no monitoramento meteorológico em tempo real. O sistema visa coletar e processar dados ambientais, facilitando a análise das condições climáticas e auxiliando na segurança pública e no planejamento urbano.
+Esse é o **Trabalho de Conclusão de Curso (TCC)** desenvolvido com o objetivo de construir um sistema completo de monitoramento climático capaz de coletar, processar e exibir dados ambientais em tempo real.
 
-# Índice
-* [Objetivo do Projeto](#objetivo-do-projeto)
-* [Equipe](#Equipe)
-* [Backlog do produto](#Product-Backlog)
-* [Competências desenvolvidas](#competências-desenvolvidas)
-* [Registro das Sprints](#Registro-das-Sprints)
+O sistema utiliza:  
+✔ Microcontrolador ESP32  
+✔ Protocolo MQTT  
+✔ Backend em Python com Flask  
+✔ Banco de dados MySQL  
+✔ Dashboard interativo para visualização dos dados  
 
+---
 
-### Trabalho de Conclusão de Curso
+## 📋 Índice
 
-O RainTrack é um sistema de monitoramento meteorológico em tempo real desenvolvido para ajudar a prever e entender melhor as condições climáticas. Utilizando o microcontrolador ESP32 e o protocolo MQTT, o sistema coleta dados ambientais, como temperatura, umidade e precipitação, e os envia para uma plataforma de visualização.
+- 📌 Sobre o Projeto  
+- 🛠 Tecnologias Utilizadas  
+- 🚀 Como Funciona  
+- ⚙️ Instalação & Configuração  
+- ▶️ Como Executar  
 
-A ideia por trás do RainTrack é proporcionar uma maneira simples e eficiente de acompanhar o clima, com um dashboard interativo que exibe os dados de forma visual e fácil de entender. Isso pode ser útil para diversas áreas, como segurança pública, planejamento urbano e até para antecipar desastres naturais causados por chuvas intensas.
+---
 
-Com esse projeto, buscamos otimizar o monitoramento do clima, tornando as informações mais acessíveis e ajudando na tomada de decisões para mitigar os impactos de eventos climáticos extremos.
+## 📌 Sobre o Projeto
 
-# Equipe
-|    Função     | Nome                                  |                                                                                                                                                      LinkedIn & GitHub                                                                                                                                                      |
-| :-----------: | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| Team Member   | Bruno Oliveira | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/bruno-oliveira-063911265/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/BrunoOliveira06) |
-| Team Member   | Gustavo Gomes  | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/gustavo-gomes-6a9a22320/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/GustavoCostaGomes) |
-| Team Member   | Igor Côrrea    | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](LINKEDINIGOR) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](GITHUBIGOR) |
-| Team Member   | Thais Píres    | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](LINKEDINTHAIS) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)]((https://github.com/ThaisPiresDosSantos)) |
+O RainTrack é um sistema que monitora condições meteorológicas em tempo real, coletando dados como:
+- Temperatura  
+- Umidade  
+- Precipitação  
 
-# Objetivo do Projeto
-O objetivo geral desse trabalho é desenvolver um sistema de monitoramento meteorológico automatizado, visando:
-* Implementar um servidor Flask conectado a um banco de dados MySQL;
-* Criar uma comunicação entre a estação meteorológica e o ESP32, utilizando o protocolo MQTT; 
-* Desenvolver um dashboard interativo que apresente as informações meteorológicas; 
-* Garantir a integridade e confiabilidade dos dados coletados, minimizando perdas.
+Esses dados são enviados por um ESP32 ao backend via MQTT, armazenados em um banco de dados e exibidos em um dashboard web intuitivo.
 
-## Tecnologias Utilizadas
+---
 
-* Git e GitHub
-* Visual Studio Code
-* Trello
-* MySQL
-* XAMPP
-* Python
-* Flask
-* CSS
-* JavaScript
-* Highcharts
-* ESP32
-* MQTT
-* Eclipse Mosquitto
+## 🛠 Tecnologias Utilizadas
 
+Este projeto foi construído utilizando:
 
+- Python (Flask)  
+- MQTT (Eclipse Mosquitto)  
+- MySQL  
+- ESP32  
+- HTML, CSS, JavaScript  
+- Highcharts  
+- Git & GitHub  
 
-# Product Backlog
+---
 
-| Rank | Prioridade | User Story                                                                                                                                              | Estimativa | Sprint |
-|------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|------------|--------|
-| 1    | Alta       | Placeholder                                                    | 5          | 1      |
-| 2    | Alta       | Placeholder                                                                    | 8          | 1      |
-| 3    | Alta       | Placeholder                                               | 5          | 2      |
-| ...  | Média      | ...                                                                                                                                                     | ...        | ...    |
-| 17   | Baixa      | Placeholder     | 2          | 3      |
+## 🚀 Como Funciona
+
+1. O dispositivo **ESP32** lê dados de sensores ambientais  
+2. Os dados são enviados via MQTT para o backend  
+3. O backend Flask processa e salva no banco MySQL  
+4. O usuário visualiza tudo no dashboard web  
+
+---
+
+## ⚙️ Instalação & Configuração
+
+### 1) Pré-requisitos
+
+Antes de começar, instale:
+
+- Python 3.7+  
+- MySQL ou MariaDB  
+- Mosquitto MQTT Broker  
+- Git  
+
+---
+
+### 2) Clone o Repositório
+  ```bash
+  git clone https://github.com/igorcsouzaa/RainTrack.git
+  cd RainTrack
+  ```
+
+---
+
+### 3) Configurar o Ambiente Python
+
+Crie um ambiente virtual e instale as dependências:
+```bash
+python -m venv venv
+venv\Scripts\activate # Windows
+source venv/bin/activate # Mac / Linux
+pip install -r requirements.txt
+```
+
+---
+
+### 4) Configuração do Banco de Dados
+
+1. Crie um banco MySQL (ex: `raintrack_db`)
+2. Configure usuário e senha
+3. Atualize os dados no arquivo de configuração (ex: `config.py`)
+
+---
+
+### 5) Configuração MQTT
+
+1. Instale o broker Mosquitto  
+2. Garanta que ele esteja rodando localmente  
+3. Atualize as configurações de host e porta no backend  
+
+---
+
+## ▶️ Como Executar
+
+### Backend Python
+  ```bash
+  flask run
+  ```
+
+Acesse no navegador:
+
+http://localhost:5000
