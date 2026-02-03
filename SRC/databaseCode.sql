@@ -48,4 +48,73 @@ INSERT INTO users (name, cpf, email, password, role)
 VALUES
 ('Admin', '00000000000', 'raintrack@gmail.com', '123', 1);
 
-SELECT * FROM users;
+-- ===============================
+-- TIPOS DE PARÂMETROS
+-- ===============================
+INSERT INTO typeParameters (typeJson, name, unit, numberOfDecimalPlaces)
+VALUES
+('temperature', 'Temperatura', '°C', 1),
+('humidity', 'Umidade', '%', 0);
+
+-- ===============================
+-- ESTAÇÃO METEOROLÓGICA
+-- ===============================
+INSERT INTO stations (name, latitude, longitude, uuid)
+VALUES
+('Estação São José dos Campos', '-23.2237', '-45.9009', 'STATION-001');
+
+-- ===============================
+-- VÍNCULO DOS PARÂMETROS COM A ESTAÇÃO
+-- ===============================
+INSERT INTO parameters (cdTypeParameter, cdStation)
+VALUES
+(
+  (SELECT id FROM typeParameters WHERE name = 'Temperatura'),
+  (SELECT id FROM stations WHERE uuid = 'STATION-001')
+),
+(
+  (SELECT id FROM typeParameters WHERE name = 'Umidade'),
+  (SELECT id FROM stations WHERE uuid = 'STATION-001')
+);
+
+-- ===============================
+-- MEDIÇÕES FICTÍCIAS - TEMPERATURA
+-- ===============================
+INSERT INTO measures (value, cdParameter, measureTime)
+VALUES
+(23.5, (SELECT p.id FROM parameters p 
+        JOIN typeParameters t ON p.cdTypeParameter = t.id 
+        WHERE t.name = 'Temperatura'), NOW() - INTERVAL 60 MINUTE),
+
+(24.0, (SELECT p.id FROM parameters p 
+        JOIN typeParameters t ON p.cdTypeParameter = t.id 
+        WHERE t.name = 'Temperatura'), NOW() - INTERVAL 45 MINUTE),
+
+(24.3, (SELECT p.id FROM parameters p 
+        JOIN typeParameters t ON p.cdTypeParameter = t.id 
+        WHERE t.name = 'Temperatura'), NOW() - INTERVAL 30 MINUTE),
+
+(24.1, (SELECT p.id FROM parameters p 
+        JOIN typeParameters t ON p.cdTypeParameter = t.id 
+        WHERE t.name = 'Temperatura'), NOW() - INTERVAL 15 MINUTE);
+
+-- ===============================
+-- MEDIÇÕES FICTÍCIAS - UMIDADE
+-- ===============================
+INSERT INTO measures (value, cdParameter, measureTime)
+VALUES
+(68, (SELECT p.id FROM parameters p 
+      JOIN typeParameters t ON p.cdTypeParameter = t.id 
+      WHERE t.name = 'Umidade'), NOW() - INTERVAL 60 MINUTE),
+
+(70, (SELECT p.id FROM parameters p 
+      JOIN typeParameters t ON p.cdTypeParameter = t.id 
+      WHERE t.name = 'Umidade'), NOW() - INTERVAL 45 MINUTE),
+
+(72, (SELECT p.id FROM parameters p 
+      JOIN typeParameters t ON p.cdTypeParameter = t.id 
+      WHERE t.name = 'Umidade'), NOW() - INTERVAL 30 MINUTE),
+
+(69, (SELECT p.id FROM parameters p 
+      JOIN typeParameters t ON p.cdTypeParameter = t.id 
+      WHERE t.name = 'Umidade'), NOW() - INTERVAL 15 MINUTE);
