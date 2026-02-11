@@ -86,10 +86,32 @@
                             tooltip: {
                                 shared: true,
                                 formatter: function() {
-                                    let s = `<b>${this.x}</b><br/>`;
-                                    this.points.forEach(p => {
-                                        s += `<span style="color:${p.color}">\u25CF</span> ${p.series.name}: <b>${p.y}</b><br/>`;
-                                    });
+                                    let idx, categories;
+                                    // Protege contra undefined
+                                    if (this.points && this.points[0] && this.chart && this.chart.options && this.chart.options.xAxis && this.chart.options.xAxis[0]) {
+                                        idx = this.points[0].point.index;
+                                        categories = this.chart.options.xAxis[0].categories;
+                                    } else if (this.point && this.series && this.series.chart && this.series.chart.options && this.series.chart.options.xAxis && this.series.chart.options.xAxis[0]) {
+                                        idx = this.point.index;
+                                        categories = this.series.chart.options.xAxis[0].categories;
+                                    } else {
+                                        return false;
+                                    }
+                                    if (!categories || idx === undefined || !categories[idx]) return false;
+                                    const category = categories[idx]; // "YYYY-MM-DD HH:MM"
+                                    const [date] = category.split(' ');
+                                    const [year, month, day] = date.split('-');
+                                    const brDate = `${day}/${month}/${year}`;
+                                    let s = `<b>${brDate}</b><br/>`;
+
+                                    if (this.points) {
+                                        this.points.forEach(p => {
+                                            s += `<span style="color:${p.color}">\u25CF</span> ${p.series.name}: <b>${p.y}</b><br/>`;
+                                        });
+                                    } else {
+                                        s += `<span style="color:${this.color}">\u25CF</span> ${this.series.name}: <b>${this.y}</b><br/>`;
+                                    }
+
                                     return s;
                                 }
                             },
@@ -116,10 +138,5 @@
         {% endif %}
     </div>
 </div>
-
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/modules/export-data.js"></script>
-<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 {% endblock %}
 
