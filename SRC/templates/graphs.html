@@ -61,14 +61,17 @@
                         }));
 
                         Highcharts.chart('chart-{{ station.id }}', {
+                            colors: ['#0284c7', '#06b6d4', '#6366f1', '#14b8a6', '#f59e0b'],
                             chart: { 
                                 zoomType: 'xy',
-                                backgroundColor: 'transparent'
+                                backgroundColor: 'transparent',
+                                style: { fontFamily: 'Inter, system-ui, sans-serif' },
+                                spacing: [16, 12, 12, 12]
                             },
                             title: { 
                                 text: 'Gráfico de Medições - {{ station.name }}',
                                 align: 'left',
-                                style: { color: '#333', fontSize: '1.2em' }
+                                style: { color: '#0f172a', fontSize: '15px', fontWeight: '700' }
                             },
                             xAxis: {
                                 categories: categories,
@@ -121,6 +124,11 @@
                                 layout: 'horizontal',
                                 itemStyle: { color: '#333' }
                             },
+                            plotOptions: {
+                                series: { marker: { radius: 3 }, borderRadius: 4 },
+                                column: { borderWidth: 0, pointPadding: 0.08 }
+                            },
+                            exporting: { buttons: { contextButton: { theme: { fill: 'transparent', stroke: '#dbe5ee', r: 8 } } } },
                             credits: { enabled: false },
                             series: series
                         });

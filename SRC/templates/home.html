@@ -5,7 +5,14 @@
 {% block content %}
 <div class="centeredContent">
     <div class="adminCard full-width-card">
-        <h1 class="title">Bem-vindo ao RainTrack!</h1>
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">Painel meteorológico</span>
+                <h1 class="title">Olá, {{ user_name }}.</h1>
+                <p class="page-subtitle">Acompanhe as condições das suas estações em um só lugar.</p>
+            </div>
+            <div class="weather-mark"><ion-icon name="partly-sunny-outline"></ion-icon></div>
+        </div>
         
         <div class="home-section">
             <p>O <strong>RainTrack</strong> é a sua solução completa para monitoramento inteligente de estações meteorológicas. Com uma interface intuitiva e gráficos detalhados, você tem acesso em tempo real a dados cruciais para a sua tomada de decisão.</p>
@@ -13,7 +20,7 @@
         </div>
 
         <div class="home-section highlight-section">
-            <h2>Recursos Principais:</h2>
+            <h2>O que você pode fazer</h2>
             <ul>
                 <li><ion-icon name="analytics-outline"></ion-icon> Gráficos Interativos e Personalizáveis</li>
                 <li><ion-icon name="map-outline"></ion-icon> Gerenciamento de Estações e Parâmetros</li>
@@ -29,9 +36,9 @@
                 <a href="{{ url_for('graphs') }}" class="btn-primary">
                     <ion-icon name="bar-chart-outline"></ion-icon> Ver Gráficos
                 </a>
-                <a href="{{ url_for('stations') }}" class="btn-secondary">
+                {% if user_role == 1 %}<a href="{{ url_for('stations') }}" class="btn-secondary">
                     <ion-icon name="location-outline"></ion-icon> Minhas Estações
-                </a>
+                </a>{% endif %}
             </div>
         </div>
     </div>

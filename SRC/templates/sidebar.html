@@ -1,54 +1,54 @@
-<div class="sidebar">
-  <a href="#" class="logo">
-    <i><ion-icon name="cloud"></ion-icon></i>
+<aside class="sidebar">
+  <a href="{{ url_for('home') if user_name else url_for('index') }}" class="logo" aria-label="RainTrack">
+    <i><ion-icon name="rainy-outline"></ion-icon></i>
     <img src="{{ url_for('static', filename='img/logoCompleta1.png') }}" alt="RainTrack" />
   </a>
-  <nav class="links">
+  <nav class="links" aria-label="Navegação principal">
     <!-- Links públicos sempre visíveis -->
-    <a href="{{ url_for('about') }}">
+    <a href="{{ url_for('about') }}" class="{{ 'active' if request.endpoint == 'about' else '' }}">
       <i><ion-icon name="information-circle-outline"></ion-icon></i>
       <span>Sobre nós</span>
     </a>
 
     {% if user_name and 'user_id' in session %}
       <!-- Links para usuários logados -->
-      <a href="{{ url_for('home') }}">
+      <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}">
         <i><ion-icon name="home-outline"></ion-icon></i>
         <span>Início</span>
       </a>
 
-      <a href="{{ url_for('graphs') }}">
+      <a href="{{ url_for('graphs') }}" class="{{ 'active' if request.endpoint == 'graphs' else '' }}">
         <i><ion-icon name="bar-chart-outline"></ion-icon></i>
         <span>Gráficos</span>
       </a>
 
       {% if user_role == 1 %}
         <!-- Links exclusivos para administradores -->
-        <a href="{{ url_for('parameters') }}">
+        <a href="{{ url_for('parameters') }}" class="{{ 'active' if request.endpoint in ['parameters', 'add_parameter', 'edit_parameter'] else '' }}">
           <i><ion-icon name="albums-outline"></ion-icon></i>
           <span>Parâmetros</span>
         </a>
 
-        <a href="{{ url_for('stations') }}">
+        <a href="{{ url_for('stations') }}" class="{{ 'active' if request.endpoint in ['stations', 'add_station', 'edit_station'] else '' }}">
           <i><ion-icon name="location-outline"></ion-icon></i>
           <span>Estações</span>
         </a>
 
-        <a href="{{ url_for('admin') }}">
+        <a href="{{ url_for('admin') }}" class="{{ 'active' if request.endpoint == 'admin' else '' }}">
           <i><ion-icon name="person-outline"></ion-icon></i>
           <span>Admin</span>
         </a>
 
-        <a href="{{ url_for('users') }}">
+        <a href="{{ url_for('users') }}" class="{{ 'active' if request.endpoint in ['users', 'edit_user'] else '' }}">
           <i><ion-icon name="people-outline"></ion-icon></i>
           <span>Usuários</span>
         </a>
       {% else %}
         <!-- Link para perfil de usuários comuns -->
-        <a href="{{ url_for('user_profile') }}">
+        {% if not is_guest %}<a href="{{ url_for('user_profile') }}" class="{{ 'active' if request.endpoint == 'user_profile' else '' }}">
           <i><ion-icon name="person-outline"></ion-icon></i>
           <span>{{ user_name }}</span>
-        </a>
+        </a>{% endif %}
       {% endif %}
 
       <a href="{{ url_for('logout') }}">
@@ -63,4 +63,10 @@
       </a>
     {% endif %}
   </nav>
-</div>
+  {% if user_name %}
+  <div class="sidebar-user">
+    <span class="user-avatar">{{ user_name[0] | upper }}</span>
+    <span class="user-meta"><strong>{{ user_name }}</strong><small>{{ 'Administrador' if user_role == 1 else ('Convidado' if is_guest else 'Usuário') }}</small></span>
+  </div>
+  {% endif %}
+</aside>
