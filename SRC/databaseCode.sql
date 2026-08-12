@@ -1,5 +1,8 @@
-CREATE DATABASE rainTrack;
+CREATE DATABASE IF NOT EXISTS rainTrack
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 USE rainTrack;
+SET NAMES utf8mb4;
 
 CREATE TABLE users (
 	id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -33,7 +36,8 @@ CREATE TABLE parameters (
     cdTypeParameter INT NOT NULL,
     cdStation INT,
     FOREIGN KEY (cdTypeParameter) REFERENCES typeParameters(id),
-    FOREIGN KEY (cdStation) REFERENCES stations(id)
+    FOREIGN KEY (cdStation) REFERENCES stations(id),
+    UNIQUE KEY uq_station_parameter (cdStation, cdTypeParameter)
 );  
 
 CREATE TABLE measures (
@@ -46,7 +50,7 @@ CREATE TABLE measures (
 
 INSERT INTO users (name, cpf, email, password, role) 
 VALUES
-('Admin', '00000000000', 'raintrack@gmail.com', '123', 1);
+('Admin', '00000000000', 'raintrack@gmail.com', 'pbkdf2:sha256:600000$0XI5OxuHLgspSnwm$62718ce06d9522aa25f89cc07adeaddcceb460b9069763124979b85a204eb7e0', 1);
 
 -- ===============================
 -- TIPOS DE PARÂMETROS
@@ -61,7 +65,7 @@ VALUES
 -- ===============================
 INSERT INTO stations (name, latitude, longitude, uuid)
 VALUES
-('Estação São José dos Campos', '-23.2237', '-45.9009', 'STATION-001');
+('Estação São José dos Campos', '-23.2237', '-45.9009', 'AABBCCDDEEFF');
 
 -- ===============================
 -- VÍNCULO DOS PARÂMETROS COM A ESTAÇÃO
@@ -70,11 +74,11 @@ INSERT INTO parameters (cdTypeParameter, cdStation)
 VALUES
 (
   (SELECT id FROM typeParameters WHERE name = 'Temperatura'),
-  (SELECT id FROM stations WHERE uuid = 'STATION-001')
+  (SELECT id FROM stations WHERE uuid = 'AABBCCDDEEFF')
 ),
 (
   (SELECT id FROM typeParameters WHERE name = 'Umidade'),
-  (SELECT id FROM stations WHERE uuid = 'STATION-001')
+  (SELECT id FROM stations WHERE uuid = 'AABBCCDDEEFF')
 );
 
 -- ===============================

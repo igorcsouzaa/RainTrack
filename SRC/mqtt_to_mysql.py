@@ -1,111 +1,119 @@
 import json
-import mysql.connector
-import paho.mqtt.client as mqtt
+import logging
+import os
+import re
 import unicodedata
 
-# Conexão com o MySQL
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="rainTrack"
-)
-cursor = db.cursor(dictionary=True)
+import paho.mqtt.client as mqtt
+import pymysql
+from dotenv import load_dotenv
 
-# Normaliza os nomes dos parâmetros para maiúsculas sem acentos
-def normalize_param(name):
-    nfkd = unicodedata.normalize('NFKD', name)
-    only_ascii = nfkd.encode('ASCII', 'ignore').decode('utf-8')
-    return only_ascii.upper()
+load_dotenv()
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"), format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger("raintrack.mqtt")
 
-# Função para validar os dados recebidos
-def validate_data(param_name, value):
+
+def normalize(value):
+    ascii_value = unicodedata.normalize("NFKD", str(value)).encode("ascii", "ignore").decode()
+    return ascii_value.upper()
+
+
+def normalize_uuid(value):
+    return re.sub(r"[^A-Fa-f0-9]", "", str(value or "")).upper()
+
+
+def validate_data(parameter, value):
     try:
-        value = float(value)  # força para número
-    except (ValueError, TypeError):
-        print(f"❌ Valor inválido para {param_name}: {value}")
+        numeric_value = float(value)
+    except (TypeError, ValueError):
         return None
-
-    if param_name == "UMIDADE":
-        if 0 <= value <= 100:
-            return value
-        else:
-            print(f"❌ Umidade fora da faixa (0–100): {value}")
-            return None
-
-    elif param_name == "TEMPERATURA":
-        if -50 <= value <= 60:
-            return value
-        else:
-            print(f"❌ Temperatura fora da faixa (-50–60): {value}")
-            return None
-
-    else:
-        print(f"⚠️ Parâmetro não reconhecido: {param_name}")
+    ranges = {"UMIDADE": (0, 100), "HUMIDITY": (0, 100), "TEMPERATURA": (-50, 60), "TEMPERATURE": (-50, 60)}
+    limits = ranges.get(normalize(parameter))
+    if limits and not limits[0] <= numeric_value <= limits[1]:
         return None
+    return numeric_value
 
-# Callback quando o cliente se conecta ao broker
-def on_connect(client, userdata, flags, rc):
-    print("Conectado ao MQTT com código:", rc)
-    client.subscribe("fatec/+/data")  # Assina todos os tópicos de estação
 
-# Callback quando uma mensagem é recebida
-def on_message(client, userdata, msg):
+def get_db_connection():
+    return pymysql.connect(
+        host=os.getenv("DB_HOST", "localhost"), port=int(os.getenv("DB_PORT", "3306")),
+        user=os.getenv("DB_USER", "raintrack"), password=os.getenv("DB_PASSWORD", ""),
+        db=os.getenv("DB_NAME", "rainTrack"), cursorclass=pymysql.cursors.DictCursor,
+        charset="utf8mb4", autocommit=False,
+    )
+
+
+def store_payload(data, connection_factory=get_db_connection):
+    station_uuid = normalize_uuid(data.get("uuid"))
+    if len(station_uuid) != 12:
+        raise ValueError("UUID ausente ou inválido")
+    parameters = {key: value for key, value in data.items() if key != "uuid"}
+    if not parameters:
+        raise ValueError("Mensagem sem medições")
+
+    inserted = 0
+    connection = connection_factory()
     try:
-        payload = msg.payload.decode()
-        print(f"Recebido no tópico {msg.topic}: {payload}")
-        data = json.loads(payload)
-
-        # uuid da estação
-        station_uuid = data.get("uuid")
-        if not station_uuid:
-            print("❌ Erro: uuid da estação não fornecido.")
-            return
-
-        # Remove uuid para sobrar apenas os parâmetros reais
-        parameters_data = {k: v for k, v in data.items() if k != "uuid"}
-
-        for param_name, value in parameters_data.items():
-            # Normaliza
-            param_name_db = normalize_param(param_name)
-
-            # Validação
-            valid_value = validate_data(param_name_db, value)
-            if valid_value is None:
-                print(f"🚫 Dado descartado: {param_name_db} -> {value}")
-                continue  # ignora dado inválido
-
-            # Busca cdParameter correto
-            cursor.execute("""
-                SELECT p.id
-                FROM parameters p
-                JOIN typeParameters t ON p.cdTypeParameter = t.id
-                JOIN stations s ON p.cdStation = s.id
-                WHERE s.uuid = %s AND t.name = %s
-            """, (station_uuid, param_name_db))
-
-            result = cursor.fetchone()
-            if result:
-                cdParameter = result['id']
+        with connection.cursor() as cursor:
+            for parameter_name, value in parameters.items():
+                normalized_name = normalize(parameter_name)
+                valid_value = validate_data(normalized_name, value)
+                if valid_value is None:
+                    logger.warning("Valor inválido descartado: %s=%r", parameter_name, value)
+                    continue
                 cursor.execute(
-                    "INSERT INTO measures (value, cdParameter) VALUES (%s, %s)",
-                    (valid_value, cdParameter)
+                    """SELECT p.id FROM parameters p
+                       JOIN typeParameters t ON p.cdTypeParameter=t.id
+                       JOIN stations s ON p.cdStation=s.id
+                       WHERE s.uuid=%s AND (UPPER(t.name)=%s OR UPPER(t.typeJson)=%s)""",
+                    (station_uuid, normalized_name, normalized_name),
                 )
-                print(f"✅ Inserido: {param_name_db} = {valid_value}")
-            else:
-                print(f"⚠️ Parâmetro '{param_name_db}' não encontrado para a estação {station_uuid}")
+                parameter = cursor.fetchone()
+                if not parameter:
+                    logger.warning("Parâmetro %s não associado à estação %s", parameter_name, station_uuid)
+                    continue
+                cursor.execute("INSERT INTO measures (value,cdParameter) VALUES (%s,%s)", (valid_value, parameter["id"]))
+                inserted += 1
+        connection.commit()
+        return inserted
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 
-        db.commit()
-        print("✔️ Dados válidos foram inseridos no banco.")
 
-    except Exception as e:
-        print("❌ Erro ao processar a mensagem:", e)
+def on_connect(client, userdata, flags, reason_code, properties=None):
+    if reason_code == 0:
+        topic = os.getenv("MQTT_TOPIC", "raintrack/+/data")
+        client.subscribe(topic)
+        logger.info("Conectado ao MQTT; ouvindo %s", topic)
+    else:
+        logger.error("Falha ao conectar ao MQTT: %s", reason_code)
 
-# Configuração do cliente MQTT
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
 
-# Conectando ao broker
-client.connect("test.mosquitto.org", 1883, 60)
-client.loop_forever()
+def on_message(client, userdata, message):
+    try:
+        payload = json.loads(message.payload.decode("utf-8"))
+        inserted = store_payload(payload)
+        logger.info("%d medição(ões) inserida(s) a partir de %s", inserted, message.topic)
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+        logger.warning("Mensagem inválida em %s: %s", message.topic, error)
+    except Exception:
+        logger.exception("Erro ao persistir mensagem de %s", message.topic)
+
+
+def main():
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=os.getenv("MQTT_CLIENT_ID", "raintrack-consumer"))
+    username = os.getenv("MQTT_USERNAME")
+    if username:
+        client.username_pw_set(username, os.getenv("MQTT_PASSWORD"))
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.reconnect_delay_set(min_delay=1, max_delay=60)
+    client.connect(os.getenv("MQTT_HOST", "localhost"), int(os.getenv("MQTT_PORT", "1883")), 60)
+    client.loop_forever()
+
+
+if __name__ == "__main__":
+    main()

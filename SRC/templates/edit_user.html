@@ -22,6 +22,7 @@
         {% endif %}
 
         <form method="POST" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="formInputs">
                 <div class="input">
                     <label for="name">Nome:</label>
@@ -40,7 +41,7 @@
 
                 <div class="input">
                     <label for="password">Nova Senha (deixe em branco para não alterar):</label>
-                    <input type="password" id="password" name="password">
+                    <input type="password" id="password" name="password" minlength="8">
                 </div>
 
                 <div class="input">

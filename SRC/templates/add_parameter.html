@@ -15,6 +15,7 @@
         {% endif %}
 
         <form class="form" action="{{ url_for('add_parameter') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="formInputs">
                 <div class="input">
                     <label for="name">Nome do Parâmetro</label>
@@ -28,12 +29,17 @@
 
                 <div class="input">
                     <label for="typeJson">Tipo JSON</label>
-                    <input type="text" name="typeJson" id="typeJson" required />
+                    <select name="typeJson" id="typeJson" required>
+                        <option value="number">Número</option>
+                        <option value="temperature">Temperatura</option>
+                        <option value="humidity">Umidade</option>
+                        <option value="boolean">Booleano</option>
+                    </select>
                 </div>
 
                 <div class="input">
                     <label for="decimalPlaces">Casas decimais</label>
-                    <input type="number" name="decimalPlaces" id="decimalPlaces" min="0" required />
+                    <input type="number" name="decimalPlaces" id="decimalPlaces" min="0" max="10" required />
                 </div>
 
                 <div class="submit">

@@ -22,6 +22,7 @@
         {% endif %}
 
         <form method="POST" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="formInputs">
                 <div class="input">
                     <label for="name">Nome do Parâmetro:</label>

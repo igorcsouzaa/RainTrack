@@ -1,0 +1,7 @@
+#pragma once
+
+const char* WIFI_SSID = "SEU_WIFI";
+const char* WIFI_PASSWORD = "SUA_SENHA";
+const char* MQTT_HOST = "192.168.1.100";
+const int MQTT_PORT = 1883;
+const char* MQTT_TOPIC = "raintrack/dht11/data";

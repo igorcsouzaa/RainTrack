@@ -1,13 +1,10 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "DHT.h"
+#include "config.h"
 
 #define DHTPIN 4
 #define DHTTYPE DHT11
-
-char* ssid = "Igor_2G";
-char* pwd = "Isabelli2014@";
-char* mqtt_server = "test.mosquitto.org";
 
 WiFiClient wclient;
 PubSubClient mqttClient(wclient);
@@ -19,7 +16,7 @@ const long interval = 60000;
 String uuid;
 
 void connectWifi(){
-  WiFi.begin(ssid, pwd);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Conectando ao WiFi");
   while(WiFi.status() != WL_CONNECTED){
     delay(500);
@@ -35,7 +32,8 @@ void connectWifi(){
 
 void connectMqtt(){
   while (!mqttClient.connected()){
-    if (mqttClient.connect("esp32-dht11")){
+    String clientId = "raintrack-" + uuid;
+    if (mqttClient.connect(clientId.c_str())){
       Serial.println("Conectado ao MQTT");
     } else {
       Serial.println("Tentando MQTT de novo em 5s...");
@@ -48,7 +46,7 @@ void setup(){
   Serial.begin(115200);
   dht.begin();
   connectWifi();
-  mqttClient.setServer(mqtt_server, 1883);
+  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
 }
 
 void loop(){
@@ -77,6 +75,6 @@ void loop(){
     Serial.print("Enviando: ");
     Serial.println(msg);
 
-    mqttClient.publish("rainTrack/dht11/data", msg);
+    mqttClient.publish(MQTT_TOPIC, msg);
   }
 }

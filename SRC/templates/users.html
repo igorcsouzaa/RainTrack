@@ -46,9 +46,12 @@
                             <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn-small btn-edit">
                                 <ion-icon name="create-outline"></ion-icon> Editar
                             </a>
-                            <a href="{{ url_for('deleteUser', idUser=user.id) }}" class="btn-small btn-delete" onclick="return confirm('Tem certeza que deseja excluir este usuário?');">
-                                <ion-icon name="trash-outline"></ion-icon> Excluir
-                            </a>
+                            <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-small btn-delete">
+                                    <ion-icon name="trash-outline"></ion-icon> Excluir
+                                </button>
+                            </form>
                         </div>
                     </div>
                 {% endfor %}
